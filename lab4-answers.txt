@@ -1,0 +1,15 @@
+Lab 4 Write-up
+
+While working on lab 4 I was still failing two SystemTests from lab3. I am still unable to pass those tests which has led me to fail all of the tests for lab4. I am out of time and am washing my hands of this. I believe I still have late days but I'm struggling with another class and need to focus on that right now. I'm ok taking a 20% on this lab, assuming my write-up is sufficient and the code looks like I understand the concept even though I'm sure there would be issues if I could run the LogFile test. 
+I really struggled with literally every lab in this class and I just want to say thank you to everyone who helped me this quarter (especially Aaditya and Ryan).
+
+1. Design Decisions:
+I chose not to implement compensating log records because I wanted to make the amount of work I needed to do less stressful. The descriptions in the spec were so simple but they made it very easy for me to think about what the code needed to do. In my recover() and rollback() code you'll see some in-line comments that are literally just copied and pasted from the spec.  I used while loops that increment the position in the raf file until we are at the end of the raf. For recover(), I chose to add all the tid's to a set and then assess whether or not the tid is really a loser transaction. The only record types that we really needed to undo or redo were UPDATE_RECORD's. ABORT and COMMIT record just throw errors and BEGIN or CHECKPOINT do nothing.
+
+2. Changes made outside of LogFile:
+Per the lab spec, I made the necessary changes to BufferPool in transactionComplete() as well as evictPage(). In evictPage() I kept the code I have (evict the first not dirty page found) but changed the code that handles the case where all pages are dirty so that instead of throwing a DbException we can just evict any page. I decided to do this for two reasons: 1) It meant writing less code (in my mind at least, in retrospect I don't think it matters). 2) I felt that it would still be safer to evict a page that hadn't been dirtied yet. 
+
+3. Potentially useful Unit Tests:
+I have no suggestions for a unit test for this lab. 
+
+ 

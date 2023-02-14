@@ -1,0 +1,23 @@
+Lab3 Write-Up
+Vanessa Ross, Arjun Jagnani
+ 
+ 
+1. What the lab is about:
+This lab is making it so that our database management system can handle queries into the database sequentially, without error, even if multiple queries come through at the same time which are not necessarily sequential. It allows the user to write their queries and then we use the LockManager class to decipher the true starting transaction whilst simultaneously comparing to concurrent transactions so that we may execute each transaction’s commands in the correct order. Our LockManager class locks on the page level allowing only one transaction to have an exclusive lock at a time or if the lock was a read lock multiple pages could have the lock. It also waits to release locks until the transaction has committed. It denies and approves locks by looking at the stored mapping from transactionId’s to the pages they lock. We also implemented the No Steal / Force by adjusting our evictPage() method in BufferPool. Now we evict the first non-dirty page we come across in the Buffer Pool. We want to evict non-dirty pages now because they haven’t been modified so we know that they won’t affect any other transactions that may still be making changes. Even if a transaction (or multiple transactions) read a page the dirty bit will still be false so we will still be able to flush it to disk because reading isn’t modifying the page. Its only once a transaction commits that we force the pages it modified to disk. We also implemented the flushPages() method which would flush all the pages to disk. However, we chose to rely on flushPage() in our implementation of transactionComplete() so that we could iterate over each page in the buffer pool, only flushing those pages that were modified by the tid. To detect deadlocks we implemented a time out function that tracks the start time and once the total runtime of the lock acquisition hits 1 second we assume a deadlock has occurred and abort. 
+ 
+2.Describe a unit test that could be added:
+It might be a bit over-the-top but it would be cool if there were some sort of output (through a test) that shows us a table of transactions and commands (similar to what we’ve seen in lectures) so that we can debug that way. 
+ 
+3.Describe design decisions:
+Deadlock Detection Policy:
+We originally used a dependency map to detect deadlocks. Sadly, none of our tests were passing so we tried a timeout function. We search for dead locks every time we try to get a page.By searching for deadlocks every time we try to get a page, rather than occasionally, we significantly reduce the amount of possible errors.
+Deadlock Resolution:
+We chose to abort the most recently added transaction at the point where the deadlock was caused. We made this choice based on the ease of implementation. Basically, we try to acquire a lock and if a deadlock is found then the transaction that caused the deadlock to occur is forfeited. 
+Locking Granularity:
+We chose to lock at the page level. We believe that locking at the page level reduces the number of times we have to call many of the LockManager class methods which will produce a more efficient program. 
+ 
+4.Any changes to the API:
+No changes were made to the API.
+ 
+5.Any feedback on the assignment?
+No feedback to give.

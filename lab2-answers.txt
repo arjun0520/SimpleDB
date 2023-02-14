@@ -1,0 +1,31 @@
+1. Runtimes of Query Experiment:
+I am out of time for today, I posted on Ed about this (post #358 - "Query Parser"). I was unable to run the comment line:
+	java -jar dist/simpledb.jar convert data.txt 2 "int,int" 
+because of the following error:
+	Error: LinkageError occurred while loading main class simpledb.SimpleDb
+
+    	java.lang.UnsupportedClassVersionError: simpledb/SimpleDb has been compiled by a more recent version of the Java 	Runtime (class file version 	61.0), this version of the Java Runtime only recognizes class file versions up to 55.0 
+which prevented me from running these tests.
+
+
+2. What this lab was about:
+In very broad terms, this lab is about allowing for more complicated queries. Part one of the lab made it so simple-db could output new relations (a new relation is a table and its tuples).  Filter and Join are basically complex comparators that create new tables. The Aggregator classes create the new tuples.  
+The way I see how part 2 works is that it helps us to build a table or modify a table at any point in the query. If we have a given table we can now add or delete tuples but to do that we need to make sure there is room on the page the table is stored on and that means we also need to make sure there is room on the HeapFile for any extra pages (if needed) which is then where the eviction code comes in to play. Even though each of these parts were separate they are completely interlinked with BufferPool. One end of the process occurs with HeapPage - insertTuple()/deleteTuple() which then looks to HeapFile which then looks to (and from) BufferPool. With the new implementation for adding and deleting tuples we have to handle evicting pages too. If a page hasn't been changed (isn't Dirty) then we can just flush it (release it back to where it came from) but if a page has been changed (is Dirty) then we have to forcibly write to disk first.
+
+
+3. Design Decisions:
+I chose to use a basic array with one element for the aggregates when groupBy is not defined. I figured that when groupBy is not defined we only need to keep one value and an array seemed simpler. For the eviction policy I chose to use a Random Replacement method. I chose this simply because it seemed like the simplest choice and right now I need simple. 
+
+
+4. Give one example of a unit test that could be added:
+I feel like the missing unit tests from this lab were done intentionally as a way to encourage us to write our own tests. I didn't have time to write any tests myself but I do wish there would have been more tests, in the Aggregate tests, that tested more situations when groupBy was not defined. The only test when groupBy is not defined seems to be to test the average. Also deleteTuple() tests. Basically any of the tests that the spec specifically said were not written, I wish were written because right now I have no idea if some of my code works or not and I fear I will find out the hard way in subsequent labs. 
+
+
+5.I did not make any changes to the API
+
+
+6. Missing or incomplete elements of code:
+All of my code is complete but I am not passing the following test:
+ - addTuple test in UnitTest/HeapFileWriteTest
+	I have posted this on Ed but I have walked through my insertTuple() method line by line and can't find any 
+	issues with my logic.
